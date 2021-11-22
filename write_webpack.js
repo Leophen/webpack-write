@@ -42,4 +42,31 @@ const createAssets = (filename) => {
   }
 }
 
-console.log(createAssets('./src/index.js'))
+function createGraph(entry) {
+  // 获取入口文件下的内容
+  const mainAsset = createAssets(entry)
+
+  // 入口文件的结果作为第一项
+  const queue = [mainAsset]
+
+  for (const asset of queue) {
+    const dirname = path.dirname(asset.filename)
+    asset.mapping = {}
+    asset.dependencies.forEach((relativePath) => {
+      // 转换文件路径为绝对路径
+      const absolutePath = path.join(dirname, relativePath)
+
+      const child = createAssets(absolutePath)
+
+      // 保存模块ID
+      asset.mapping[relativePath] = child.id
+
+      // 递归去遍历所有子节点的文件
+      queue.push(child)
+    })
+  }
+  return queue
+}
+
+const graph = createGraph('./src/index.js')
+console.log(graph)
