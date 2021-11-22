@@ -101,4 +101,5 @@ function bundle(graph) {
 }
 
 const graph = createGraph('./src/index.js')
-console.log(graph)
+const result = bundle(graph)
+console.log(result)
