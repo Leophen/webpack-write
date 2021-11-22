@@ -68,5 +68,37 @@ function createGraph(entry) {
   return queue
 }
 
+function bundle(graph) {
+  let modules = ''
+
+  graph.forEach((item) => {
+    modules += `
+      ${item.id}: [
+        function (require, module, exports){
+          ${item.code}
+        },
+        ${JSON.stringify(item.mapping)}
+      ],
+    `
+  })
+
+  return `
+    (function(modules){
+      function require(id){
+        const [fn, mapping] = modules[id];
+        function localRequire(relativePath){
+          return require(mapping[relativePath]);
+        }
+        const module = {
+          exports: {}
+        }
+        fn(localRequire, module, module.exports);
+        return module.exports;
+      }
+      require(0);
+    })({${modules}})
+  `
+}
+
 const graph = createGraph('./src/index.js')
 console.log(graph)
